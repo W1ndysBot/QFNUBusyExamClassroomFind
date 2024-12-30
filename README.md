@@ -1,2 +1,2 @@
-# QFNUBustExamClassroomFind
+# QFNUBusyExamClassroomFind
 曲阜师范大学期末周考试教室查询

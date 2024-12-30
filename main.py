@@ -3,6 +3,8 @@
 import logging
 import os
 import sys
+from datetime import datetime
+from get_busy_classroom import extract_classrooms, query_classrooms
 
 # 添加项目根目录到sys.path
 sys.path.append(
@@ -41,6 +43,34 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
         raw_message = str(msg.get("raw_message"))
         role = str(msg.get("sender", {}).get("role"))
         message_id = str(msg.get("message_id"))
+
+        authorized = is_authorized(role, user_id)
+
+        # 开关
+        if raw_message == "qfnubecf":
+            # 检查开关
+            if not authorized:
+                await send_group_msg(
+                    websocket,
+                    group_id,
+                    "你没有权限使用此功能，请联系管理员。",
+                )
+                return
+            else:
+                if load_function_status(group_id):
+                    save_function_status(group_id, False)
+                    await send_group_msg(
+                        websocket,
+                        group_id,
+                        "考试教室查询功能已关闭",
+                    )
+                else:
+                    save_function_status(group_id, True)
+                    await send_group_msg(
+                        websocket,
+                        group_id,
+                        "考试教室查询功能已开启",
+                    )
 
     except Exception as e:
         logging.error(f"处理QFNUBustExamClassroomFind群消息失败: {e}")

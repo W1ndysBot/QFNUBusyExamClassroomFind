@@ -50,7 +50,7 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
         role = str(msg.get("sender", {}).get("role"))
         message_id = str(msg.get("message_id"))
 
-        authorized = is_authorized(role, user_id)
+        authorized = user_id in owner_id
 
         # 开关
         if raw_message == "qfnubecf":

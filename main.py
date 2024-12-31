@@ -126,7 +126,7 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                 full_message = "".join(message_parts)
                 full_message = (
                     f"[CQ:reply,id={message_id}]{full_message}\n\n"
-                    "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,仅供参考。\n"
+                    "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,且不能保证100%覆盖,仅供参考。\n"
                     "如果你想提供你的考试数据,请前往 https://qfnuics.easy-qfnu.top 将你的考试数据导出ics,数据将会存在后台以供大家使用（整个过程完全匿名）。"
                 )
                 await send_group_msg(

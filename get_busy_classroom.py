@@ -54,32 +54,42 @@ def group_classrooms_by_time(upcoming_classrooms):
     return time_groups
 
 
-# 提取教室信息
-file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exam_info.txt")
-classrooms = extract_classrooms(file_path)
+def main():
+    # 提取教室信息
+    file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"
+    )
+    classrooms = extract_classrooms(file_path)
 
-# 查询某个楼的教室
-building_name = "综合教学楼"  # 你可以根据需要更改
-current_time = datetime.now()  # 获取当前时间
-busy_classrooms = query_classrooms(classrooms, building_name, current_time)
+    # 查询某个楼的教室
+    building_name = "综合教学楼"  # 你可以根据需要更改
+    current_time = datetime.now()  # 获取当前时间
+    busy_classrooms = query_classrooms(classrooms, building_name, current_time)
 
-# 获取今日内往后时间还有考场的教室
-upcoming_classrooms = get_upcoming_classrooms(classrooms, building_name, current_time)
+    # 获取今日内往后时间还有考场的教室
+    upcoming_classrooms = get_upcoming_classrooms(
+        classrooms, building_name, current_time
+    )
 
-# 按时间段分组教室
-time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
+    # 按时间段分组教室
+    time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
 
-# 输出结果
-if busy_classrooms:
-    room_numbers = ", ".join([room for room, _ in busy_classrooms])
-    print(f"{building_name}的有考场教室：{room_numbers}")
-else:
-    print(f"{building_name}没有考场教室。")
+    # 输出结果
+    if busy_classrooms:
+        room_numbers = ", ".join([room for room, _ in busy_classrooms])
+        print(f"{building_name}的有考场教室：{room_numbers}")
+    else:
+        print(f"{building_name}没有考场教室。")
 
-if time_grouped_classrooms:
-    for (start_time, end_time), rooms in time_grouped_classrooms.items():
-        room_list = ", ".join(rooms)
-        print(f"{building_name}的 {room_list} 将在 {start_time} 至 {end_time} 进行考试。")
-else:
-    print(f"{building_name}今日内没有即将开始的考场教室。")
+    if time_grouped_classrooms:
+        for (start_time, end_time), rooms in time_grouped_classrooms.items():
+            room_list = ", ".join(rooms)
+            print(
+                f"{building_name}的 {room_list} 将在 {start_time} 至 {end_time} 进行考试。"
+            )
+    else:
+        print(f"{building_name}今日内没有即将开始的考场教室。")
 
+
+if __name__ == "__main__":
+    main()

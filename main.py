@@ -4,16 +4,16 @@ import logging
 import os
 import sys
 from datetime import datetime
-from get_busy_classroom import extract_classrooms, query_classrooms
 
 # 添加项目根目录到sys.path
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-from app.config import owner_id
+from app.config import *
 from app.api import *
 from app.switch import load_switch, save_switch
+from app.scripts.QFNUBustExamClassroomFind.get_busy_classroom import extract_classrooms, query_classrooms
 
 # 数据存储路径，实际开发时，请将QFNUBustExamClassroomFind替换为具体的数据存放路径
 DATA_DIR = os.path.join(
@@ -53,7 +53,7 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                 await send_group_msg(
                     websocket,
                     group_id,
-                    "你没有权限使用此功能，请联系管理员。",
+                    f"[CQ:reply,id={message_id}]❌❌❌你没有权限使用此功能，请联系管理员。",
                 )
                 return
             else:
@@ -62,42 +62,23 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                     await send_group_msg(
                         websocket,
                         group_id,
-                        "考试教室查询功能已关闭",
+                        f"[CQ:reply,id={message_id}]🚫🚫🚫曲阜师范大学期末考试考场教室查询功能已关闭",
                     )
                 else:
                     save_function_status(group_id, True)
                     await send_group_msg(
                         websocket,
                         group_id,
-                        "考试教室查询功能已开启",
+                        f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启",
                     )
+                    
 
     except Exception as e:
         logging.error(f"处理QFNUBustExamClassroomFind群消息失败: {e}")
         await send_group_msg(
             websocket,
             group_id,
-            "处理QFNUBustExamClassroomFind群消息失败，错误信息：" + str(e),
-        )
-        return
-
-
-# 群通知处理函数
-async def handle_QFNUBustExamClassroomFind_group_notice(websocket, msg):
-    # 确保数据目录存在
-    os.makedirs(DATA_DIR, exist_ok=True)
-    try:
-        user_id = str(msg.get("user_id"))
-        group_id = str(msg.get("group_id"))
-        raw_message = str(msg.get("raw_message"))
-        role = str(msg.get("sender", {}).get("role"))
-        message_id = str(msg.get("message_id"))
-
-    except Exception as e:
-        logging.error(f"处理QFNUBustExamClassroomFind群通知失败: {e}")
-        await send_group_msg(
-            websocket,
-            group_id,
-            "处理QFNUBustExamClassroomFind群通知失败，错误信息：" + str(e),
+            f"[CQ:reply,id={message_id}]❌❌❌处理QFNUBustExamClassroomFind群消息失败，错误信息："
+            + str(e),
         )
         return

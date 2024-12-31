@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+import os
 
 
 def extract_classrooms(file_path):
@@ -36,7 +37,7 @@ def query_classrooms(classrooms, building_name, current_time):
 
 
 # 提取教室信息
-file_path = "exam_info.txt"
+file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exam_info.txt")
 classrooms = extract_classrooms(file_path)
 
 # 查询某个楼的教室

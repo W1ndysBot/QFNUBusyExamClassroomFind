@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 import sys
 from datetime import datetime
 
@@ -81,8 +82,28 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
         else:
             match = re.match(r"(.*)考场", raw_message)
             if match:
+                file_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"
+                )
+                classrooms = extract_classrooms(file_path)
                 building_name = match.group(1)
-                query_classrooms(building_name)
+                current_time = datetime.now()  # 获取当前时间
+                busy_classrooms = query_classrooms(
+                    classrooms, building_name, current_time
+                )
+                if busy_classrooms:
+                    room_numbers = ", ".join([room for room, _ in busy_classrooms])
+                    await send_group_msg(
+                        websocket,
+                        group_id,
+                        f"当前时间：{current_time}，在{building_name}有考场教室：{room_numbers}",
+                    )
+                else:
+                    await send_group_msg(
+                        websocket,
+                        group_id,
+                        f"当前时间：{current_time}，在{building_name}没有考场教室。",
+                    )
 
     except Exception as e:
         logging.error(f"处理QFNUBustExamClassroomFind群消息失败: {e}")

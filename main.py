@@ -39,6 +39,100 @@ def save_function_status(group_id, status):
     save_switch(group_id, "QFNUBustExamClassroomFind", status)
 
 
+# 处理开关状态
+async def toggle_function_status(websocket, group_id, message_id, authorized):
+    if not authorized:
+        await send_group_msg(
+            websocket,
+            group_id,
+            f"[CQ:reply,id={message_id}]❌❌❌你没有权限对曲阜师范大学期末考试考场教室查询功能进行操作,请联系管理员。",
+        )
+        return
+
+    if load_function_status(group_id):
+        save_function_status(group_id, False)
+        await send_group_msg(
+            websocket,
+            group_id,
+            f"[CQ:reply,id={message_id}]🚫🚫🚫曲阜师范大学期末考试考场教室查询功能已关闭",
+        )
+    else:
+        save_function_status(group_id, True)
+        await send_group_msg(
+            websocket,
+            group_id,
+            f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启\n"
+            "开启后,本群内成员可以查询曲阜师范大学期末考试考场教室信息。\n"
+            "使用方法：群内发送“xxx考场”,即可查询xxx考场的教室信息,例如：\n"
+            "群内发送“综合教学楼考场”,即可查询综合教学楼考场的教室信息。",
+        )
+
+
+# 处理考场信息
+async def process_exam_classroom_info(websocket, group_id, message_id, raw_message):
+    # 教学楼简称到全称的映射
+    building_name_map = {
+        "综合楼": "综合教学楼",
+        "生科楼": "生物楼",
+        "生科": "生物楼",
+        "数科楼": "数学楼",
+        # 添加更多映射
+    }
+
+    match = re.match(r"(.*)考场", raw_message)
+    if match:
+        building_name = match.group(1)
+
+        # 使用映射替换简称为全称
+        building_name = building_name_map.get(building_name, building_name)
+
+        file_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"
+        )
+        classrooms = extract_classrooms(file_path)
+        current_time = datetime.now()  # 获取当前时间
+        busy_classrooms = query_classrooms(classrooms, building_name, current_time)
+        upcoming_classrooms = get_upcoming_classrooms(
+            classrooms, building_name, current_time
+        )
+        time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
+        message_parts = []
+
+        if busy_classrooms:
+            room_numbers = ", ".join([room for room, _ in busy_classrooms])
+            message_parts.append(
+                f"当前时间：{current_time},在{building_name}有考场教室：{room_numbers}\n"
+            )
+        else:
+            message_parts.append(
+                f"当前时间：{current_time},在{building_name}没有考场教室\n"
+            )
+
+        if time_grouped_classrooms:
+            for (
+                start_time,
+                end_time,
+            ), rooms in time_grouped_classrooms.items():
+                room_list = ", ".join(rooms)
+                message_parts.append(
+                    f"{building_name} 的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
+                )
+        else:
+            message_parts.append(f"{building_name}今日内没有即将开始的考场教室\n")
+
+        full_message = "".join(message_parts)
+        full_message = (
+            f"[CQ:reply,id={message_id}]{full_message}\n\n"
+            "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,且不能保证100%覆盖,仅供参考。\n"
+            "如果你想提供你的考试数据,请前往 https://qfnuics.easy-qfnu.top 将你的考试数据导出ics,数据将会存在后台以供大家使用（整个过程完全匿名）。"
+        )
+        await send_group_msg(
+            websocket,
+            group_id,
+            full_message,
+        )
+
+
 # 群消息处理函数
 async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
     # 确保数据目录存在
@@ -54,89 +148,16 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
 
         # 开关
         if raw_message == "qfnubecf":
-            # 检查开关
-            if not authorized:
-                await send_group_msg(
-                    websocket,
-                    group_id,
-                    f"[CQ:reply,id={message_id}]❌❌❌你没有权限对曲阜师范大学期末考试考场教室查询功能进行操作,请联系管理员。",
-                )
-                return
-            else:
-                if load_function_status(group_id):
-                    save_function_status(group_id, False)
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[CQ:reply,id={message_id}]🚫🚫🚫曲阜师范大学期末考试考场教室查询功能已关闭",
-                    )
-                else:
-                    save_function_status(group_id, True)
-                    await send_group_msg(
-                        websocket,
-                        group_id,
-                        f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启\n"
-                        "开启后,本群内成员可以查询曲阜师范大学期末考试考场教室信息。\n"
-                        "使用方法：群内发送“xxx考场”,即可查询xxx考场的教室信息,例如：\n"
-                        "群内发送“综合教学楼考场”,即可查询综合教学楼考场的教室信息。",
-                    )
+            await toggle_function_status(websocket, group_id, message_id, authorized)
+            return
 
         # 检查是否开启
         if not load_function_status(group_id):
             return
         else:
-            match = re.match(r"(.*)考场", raw_message)
-            if match:
-                file_path = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"
-                )
-                classrooms = extract_classrooms(file_path)
-                building_name = match.group(1)
-                current_time = datetime.now()  # 获取当前时间
-                busy_classrooms = query_classrooms(
-                    classrooms, building_name, current_time
-                )
-                upcoming_classrooms = get_upcoming_classrooms(
-                    classrooms, building_name, current_time
-                )
-                time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
-                message_parts = []
-
-                if busy_classrooms:
-                    room_numbers = ", ".join([room for room, _ in busy_classrooms])
-                    message_parts.append(
-                        f"当前时间：{current_time},在{building_name}有考场教室：{room_numbers}\n"
-                    )
-                else:
-                    message_parts.append(
-                        f"当前时间：{current_time},在{building_name}没有考场教室\n"
-                    )
-
-                if time_grouped_classrooms:
-                    for (
-                        start_time,
-                        end_time,
-                    ), rooms in time_grouped_classrooms.items():
-                        room_list = ", ".join(rooms)
-                        message_parts.append(
-                            f"{building_name} 的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
-                        )
-                else:
-                    message_parts.append(
-                        f"{building_name}今日内没有即将开始的考场教室\n"
-                    )
-
-                full_message = "".join(message_parts)
-                full_message = (
-                    f"[CQ:reply,id={message_id}]{full_message}\n\n"
-                    "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,且不能保证100%覆盖,仅供参考。\n"
-                    "如果你想提供你的考试数据,请前往 https://qfnuics.easy-qfnu.top 将你的考试数据导出ics,数据将会存在后台以供大家使用（整个过程完全匿名）。"
-                )
-                await send_group_msg(
-                    websocket,
-                    group_id,
-                    full_message,
-                )
+            await process_exam_classroom_info(
+                websocket, group_id, message_id, raw_message
+            )
 
     except Exception as e:
         logging.error(f"处理QFNUBustExamClassroomFind群消息失败: {e}")

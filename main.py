@@ -21,7 +21,7 @@ from app.scripts.QFNUBustExamClassroomFind.get_busy_classroom import (
     group_classrooms_by_time,
 )
 
-# 数据存储路径，实际开发时，请将QFNUBustExamClassroomFind替换为具体的数据存放路径
+# 数据存储路径,实际开发时,请将QFNUBustExamClassroomFind替换为具体的数据存放路径
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "data",
@@ -59,7 +59,7 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                 await send_group_msg(
                     websocket,
                     group_id,
-                    f"[CQ:reply,id={message_id}]❌❌❌你没有权限使用此功能，请联系管理员。",
+                    f"[CQ:reply,id={message_id}]❌❌❌你没有权限对曲阜师范大学期末考试考场教室查询功能进行操作,请联系管理员。",
                 )
                 return
             else:
@@ -75,7 +75,10 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                     await send_group_msg(
                         websocket,
                         group_id,
-                        f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启",
+                        f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启\n"
+                        "开启后,本群内成员可以查询曲阜师范大学期末考试考场教室信息。\n"
+                        "使用方法：群内发送“xxx考场”,即可查询xxx考场的教室信息,例如：\n"
+                        "群内发送“综合教学楼考场”,即可查询综合教学楼考场的教室信息。",
                     )
 
         # 检查是否开启
@@ -102,11 +105,11 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                 if busy_classrooms:
                     room_numbers = ", ".join([room for room, _ in busy_classrooms])
                     message_parts.append(
-                        f"当前时间：{current_time}，在{building_name}有考场教室：{room_numbers}\n"
+                        f"当前时间：{current_time},在{building_name}有考场教室：{room_numbers}\n"
                     )
                 else:
                     message_parts.append(
-                        f"当前时间：{current_time}，在{building_name}没有考场教室\n"
+                        f"当前时间：{current_time},在{building_name}没有考场教室\n"
                     )
 
                 if time_grouped_classrooms:
@@ -140,7 +143,7 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
         await send_group_msg(
             websocket,
             group_id,
-            f"[CQ:reply,id={message_id}]❌❌❌处理QFNUBustExamClassroomFind群消息失败，错误信息："
+            f"[CQ:reply,id={message_id}]❌❌❌处理QFNUBustExamClassroomFind群消息失败,错误信息："
             + str(e),
         )
         return

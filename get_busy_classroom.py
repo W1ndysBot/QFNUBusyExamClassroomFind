@@ -28,12 +28,12 @@ def extract_classrooms(file_path):
 
 
 def query_classrooms(classrooms, building_name, current_time):
-    available_classrooms = []
+    busy_classrooms = []
     for classroom, (start_time, end_time, subject) in classrooms.items():
         if building_name in classroom and start_time <= current_time <= end_time:
             room_number = classroom.replace(building_name, "").strip()
-            available_classrooms.append((room_number, subject))
-    return available_classrooms
+            busy_classrooms.append((room_number, subject))
+    return busy_classrooms
 
 
 # 提取教室信息
@@ -43,11 +43,11 @@ classrooms = extract_classrooms(file_path)
 # 查询某个楼的教室
 building_name = "综合教学楼"  # 你可以根据需要更改
 current_time = datetime.now()  # 获取当前时间
-available_classrooms = query_classrooms(classrooms, building_name, current_time)
+busy_classrooms = query_classrooms(classrooms, building_name, current_time)
 
 # 输出结果
-if available_classrooms:
-    room_numbers = ", ".join([room for room, _ in available_classrooms])
+if busy_classrooms:
+    room_numbers = ", ".join([room for room, _ in busy_classrooms])
     print(f"在{building_name}的有考场教室：{room_numbers}")
 else:
     print(f"在{building_name}没有考场教室。")

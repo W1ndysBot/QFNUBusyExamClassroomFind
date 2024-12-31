@@ -13,7 +13,10 @@ sys.path.append(
 from app.config import *
 from app.api import *
 from app.switch import load_switch, save_switch
-from app.scripts.QFNUBustExamClassroomFind.get_busy_classroom import extract_classrooms, query_classrooms
+from app.scripts.QFNUBustExamClassroomFind.get_busy_classroom import (
+    extract_classrooms,
+    query_classrooms,
+)
 
 # 数据存储路径，实际开发时，请将QFNUBustExamClassroomFind替换为具体的数据存放路径
 DATA_DIR = os.path.join(
@@ -71,7 +74,15 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                         group_id,
                         f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启",
                     )
-                    
+
+        # 检查是否开启
+        if not load_function_status(group_id):
+            return
+        else:
+            match = re.match(r"(.*)考场", raw_message)
+            if match:
+                building_name = match.group(1)
+                query_classrooms(building_name)
 
     except Exception as e:
         logging.error(f"处理QFNUBustExamClassroomFind群消息失败: {e}")

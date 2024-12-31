@@ -70,21 +70,24 @@ async def toggle_function_status(websocket, group_id, message_id, authorized):
 
 # 处理考场信息
 async def process_exam_classroom_info(websocket, group_id, message_id, raw_message):
-    # 教学楼简称到全称的映射
+    # 教学楼全称到简称的映射
     building_name_map = {
-        "综合楼": "综合教学楼",
-        "生科楼": "生物楼",
-        "生科": "生物楼",
-        "数科楼": "数学楼",
+        "综合教学楼": ["综合楼"],
+        "生物楼": ["生科楼", "生科"],
+        "数学楼": ["数科楼"],
         # 添加更多映射
     }
 
     match = re.match(r"(.*)考场", raw_message)
     if match:
-        building_name = match.group(1)
+        input_name = match.group(1)
+        building_name = input_name  # 默认使用输入的名称
 
-        # 使用映射替换简称为全称
-        building_name = building_name_map.get(building_name, building_name)
+        # 查找全称
+        for full_name, aliases in building_name_map.items():
+            if input_name in aliases:
+                building_name = full_name
+                break
 
         file_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"

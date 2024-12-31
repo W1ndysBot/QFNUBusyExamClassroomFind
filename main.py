@@ -75,6 +75,7 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         "综合教学楼": ["综合楼"],
         "生物楼": ["生科楼", "生科"],
         "数学楼": ["数科楼"],
+        "实验中心": ["田家炳实验楼", "实验楼"],
         # 添加更多映射
     }
 

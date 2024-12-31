@@ -104,11 +104,11 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         if busy_classrooms:
             room_numbers = ", ".join([room for room, _ in busy_classrooms])
             message_parts.append(
-                f"当前时间：{current_time},在{building_name}有考场教室：{room_numbers}\n"
+                f"当前时间：{current_time},在{building_name}有考场教室：{room_numbers}\n\n"
             )
         else:
             message_parts.append(
-                f"当前时间：{current_time},在{building_name}没有考场教室\n"
+                f"当前时间：{current_time},在{building_name}没有考场教室\n\n"
             )
 
         if time_grouped_classrooms:

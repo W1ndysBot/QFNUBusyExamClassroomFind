@@ -49,7 +49,7 @@ def get_upcoming_classrooms(classrooms, building_name, current_time):
 def group_classrooms_by_time(upcoming_classrooms):
     time_groups = defaultdict(list)
     for room, subject, start, end in upcoming_classrooms:
-        time_range = (start.strftime('%H:%M'), end.strftime('%H:%M'))
+        time_range = (start.strftime("%H:%M"), end.strftime("%H:%M"))
         time_groups[time_range].append(room)
     return time_groups
 

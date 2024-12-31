@@ -116,14 +116,14 @@ async def handle_QFNUBustExamClassroomFind_group_message(websocket, msg):
                     ), rooms in time_grouped_classrooms.items():
                         room_list = ", ".join(rooms)
                         message_parts.append(
-                            f"教室 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
+                            f"{building_name} 的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
                         )
                 else:
                     message_parts.append(
-                        f"在{building_name}今日内没有即将开始的考场教室\n"
+                        f"{building_name}今日内没有即将开始的考场教室\n"
                     )
 
-                full_message = " ".join(message_parts)
+                full_message = "".join(message_parts)
                 full_message = (
                     f"[CQ:reply,id={message_id}]{full_message}\n\n"
                     "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,仅供参考。\n"

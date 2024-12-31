@@ -72,13 +72,14 @@ time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
 # 输出结果
 if busy_classrooms:
     room_numbers = ", ".join([room for room, _ in busy_classrooms])
-    print(f"在{building_name}的有考场教室：{room_numbers}")
+    print(f"{building_name}的有考场教室：{room_numbers}")
 else:
-    print(f"在{building_name}没有考场教室。")
+    print(f"{building_name}没有考场教室。")
 
 if time_grouped_classrooms:
     for (start_time, end_time), rooms in time_grouped_classrooms.items():
         room_list = ", ".join(rooms)
-        print(f"教室 {room_list} 将在 {start_time} 至 {end_time} 进行考试。")
+        print(f"{building_name}的 {room_list} 将在 {start_time} 至 {end_time} 进行考试。")
 else:
-    print(f"在{building_name}今日内没有即将开始的考场教室。")
+    print(f"{building_name}今日内没有即将开始的考场教室。")
+

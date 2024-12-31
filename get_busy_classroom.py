@@ -10,7 +10,7 @@ def extract_classrooms(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             if line in seen_lines:
-                print(f"重复行: {line.strip()}")  # 输出重复行
+                # print(f"重复行: {line.strip()}")  # 输出重复行
                 continue
             seen_lines.add(line)
             match = re.search(

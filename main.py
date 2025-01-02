@@ -122,7 +122,7 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
             os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"
         )
         classrooms = extract_classrooms(file_path)
-        current_time = datetime.now()  # 获取当前时间
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 获取当前时间，精确到秒
         busy_classrooms = query_classrooms(classrooms, building_name, current_time)
         upcoming_classrooms = get_upcoming_classrooms(
             classrooms, building_name, current_time

@@ -76,13 +76,41 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         "生物楼": ["生科楼", "生科"],
         "数学楼": ["数科楼"],
         "实验中心": ["田家炳实验楼", "实验楼"],
+        "JA": ["A楼", "a楼"],
+        "JB": ["B楼", "b楼"],
+        "JC": ["C楼", "c楼"],
+        "JD": ["D楼", "d楼"],
+        "JE": ["E楼", "e楼"],
+        "JF": ["F楼", "f楼"],
+        "JG": ["G楼", "g楼"],
+        "JH": ["H楼", "h楼"],
+        "JI": ["I楼", "i楼"],
+        "JJ": ["J楼", "j楼"],
+        "JK": ["K楼", "k楼"],
+        "JL": ["L楼", "l楼"],
+        "JM": ["M楼", "m楼"],
+        "JN": ["N楼", "n楼"],
+        "JO": ["O楼", "o楼"],
+        "JP": ["P楼", "p楼"],
+        "JQ": ["Q楼", "q楼"],
+        "JR": ["R楼", "r楼"],
+        "JS": ["S楼", "s楼"],
+        "JT": ["T楼", "t楼"],
+        "JU": ["U楼", "u楼"],
+        "JV": ["V楼", "v楼"],
+        "JW": ["W楼", "w楼"],
+        "JX": ["X楼", "x楼"],
+        "JY": ["Y楼", "y楼"],
+        "JZ": ["Z楼", "z楼"],
         # 添加更多映射
     }
 
     match = re.match(r"(.*)考场", raw_message)
     if match:
         input_name = match.group(1)
-        building_name = input_name  # 默认使用输入的名称
+
+        # 转换为全大写字母
+        building_name = input_name.upper()
 
         # 查找全称
         for full_name, aliases in building_name_map.items():

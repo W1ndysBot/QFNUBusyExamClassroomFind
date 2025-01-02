@@ -122,7 +122,9 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
                     f"{building_name} 的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
                 )
         else:
-            message_parts.append(f"{building_name}今日内没有即将开始的考场教室\n")
+            message_parts.append(
+                f"{building_name}今日内没有即将开始的考场教室\n请注意教室名称以教务系统为准，尽量不要用简称和俗语，如综合教学楼，JA等"
+            )
 
         full_message = "".join(message_parts)
         full_message = (

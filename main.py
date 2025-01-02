@@ -133,11 +133,11 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         if busy_classrooms:
             room_numbers = ", ".join([room for room, _ in busy_classrooms])
             message_parts.append(
-                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')},在{building_name}有考场教室：{room_numbers}\n\n"
+                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')},在【{building_name}】有考场教室：{room_numbers}\n\n"
             )
         else:
             message_parts.append(
-                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')},在{building_name}没有考场教室\n\n"
+                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')},在【{building_name}】没有考场教室\n\n"
             )
 
         if time_grouped_classrooms:
@@ -147,11 +147,11 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
             ), rooms in time_grouped_classrooms.items():
                 room_list = ", ".join(rooms)
                 message_parts.append(
-                    f"{building_name} 的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
+                    f"【{building_name}】的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
                 )
         else:
             message_parts.append(
-                f"{building_name}今日内没有即将开始的考场教室或教学楼名字不存在\n请注意教室名称以教务系统为准，尽量不要用简称和俗语，如综合教学楼，JA等"
+                f"【{building_name}】今日内没有即将开始的考场教室或教学楼名字不存在\n请注意教室名称以教务系统为准，尽量不要用简称和俗语，如综合教学楼，JA等"
             )
 
         full_message = "".join(message_parts)

@@ -37,13 +37,18 @@ def query_classrooms(classrooms, building_name, current_time):
     return busy_classrooms
 
 
-def get_upcoming_classrooms(classrooms, building_name, current_time):
-    upcoming_classrooms = []
+def get_today_classrooms(classrooms, building_name, current_time):
+    today_classrooms = []
+    current_date = current_time.date()
     for classroom, (start_time, end_time, subject) in classrooms.items():
-        if building_name in classroom and start_time > current_time:
+        if (
+            building_name in classroom
+            and start_time.date() == current_date
+            and start_time > current_time
+        ):
             room_number = classroom.replace(building_name, "").strip()
-            upcoming_classrooms.append((room_number, subject, start_time, end_time))
-    return upcoming_classrooms
+            today_classrooms.append((room_number, subject, start_time, end_time))
+    return today_classrooms
 
 
 def group_classrooms_by_time(upcoming_classrooms):
@@ -62,17 +67,15 @@ def main():
     classrooms = extract_classrooms(file_path)
 
     # 查询某个楼的教室
-    building_name = "综合教学楼"  # 你可以根据需要更改
+    building_name = "格物楼"  # 你可以根据需要更改
     current_time = datetime.now()  # 获取当前时间
     busy_classrooms = query_classrooms(classrooms, building_name, current_time)
 
-    # 获取今日内往后时间还有考场的教室
-    upcoming_classrooms = get_upcoming_classrooms(
-        classrooms, building_name, current_time
-    )
+    # 获取今日内其他时间段有考场的教室
+    today_classrooms = get_today_classrooms(classrooms, building_name, current_time)
 
     # 按时间段分组教室
-    time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
+    time_grouped_classrooms = group_classrooms_by_time(today_classrooms)
 
     # 输出结果
     if busy_classrooms:

@@ -6,13 +6,8 @@ from collections import defaultdict
 
 def extract_classrooms(file_path):
     classrooms = {}
-    seen_lines = set()  # 用于记录已经处理过的行
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            if line in seen_lines:
-                # print(f"重复行: {line.strip()}")  # 输出重复行
-                continue
-            seen_lines.add(line)
             match = re.search(
                 r"课程名称: (.+?), 考试时间: (\d{4}-\d{2}-\d{2} \d{2}:\d{2})~(\d{2}:\d{2}), 考场: (\S+)",
                 line,
@@ -68,7 +63,20 @@ def main():
 
     # 查询某个楼的教室
     building_name = "格物楼"  # 你可以根据需要更改
-    current_time = datetime.now()  # 获取当前时间
+    test_year = 2025
+    test_month = 1
+    test_day = 3
+    test_hour = 10
+    test_minute = 0
+    current_time = datetime.now().replace(
+        year=test_year,
+        month=test_month,
+        day=test_day,
+        hour=test_hour,
+        minute=test_minute,
+        second=0,
+        microsecond=0,
+    )  # 获取当前时间
     busy_classrooms = query_classrooms(classrooms, building_name, current_time)
 
     # 获取今日内其他时间段有考场的教室

@@ -17,7 +17,7 @@ from app.switch import load_switch, save_switch
 from app.scripts.QFNUBustExamClassroomFind.get_busy_classroom import (
     extract_classrooms,
     query_classrooms,
-    get_upcoming_classrooms,
+    get_today_classrooms,
     group_classrooms_by_time,
 )
 
@@ -124,10 +124,10 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         classrooms = extract_classrooms(file_path)
         current_time = datetime.now()  # 获取当前时间，精确到秒
         busy_classrooms = query_classrooms(classrooms, building_name, current_time)
-        upcoming_classrooms = get_upcoming_classrooms(
+        today_classrooms = get_today_classrooms(
             classrooms, building_name, current_time
         )
-        time_grouped_classrooms = group_classrooms_by_time(upcoming_classrooms)
+        time_grouped_classrooms = group_classrooms_by_time(today_classrooms)
         message_parts = []
 
         if busy_classrooms:

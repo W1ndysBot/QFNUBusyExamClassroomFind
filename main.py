@@ -16,8 +16,8 @@ from app.api import *
 from app.switch import load_switch, save_switch
 from app.scripts.QFNUBustExamClassroomFind.get_busy_classroom import (
     extract_classrooms,
-    query_classrooms,
-    get_today_classrooms,
+    get_tomorrow_classrooms,
+    get_upcoming_classrooms,
     group_classrooms_by_time,
 )
 
@@ -123,40 +123,38 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         )
         classrooms = extract_classrooms(file_path)
         current_time = datetime.now()  # 获取当前时间，精确到秒
-        busy_classrooms = query_classrooms(classrooms, building_name, current_time)
-        today_classrooms = get_today_classrooms(
+
+        # 获取该教学楼今日内往后时间还有考场的教室
+        upcoming_classrooms = get_upcoming_classrooms(
             classrooms, building_name, current_time
         )
-        time_grouped_classrooms = group_classrooms_by_time(today_classrooms)
-        message_parts = []
-
-        if busy_classrooms:
-            room_numbers = ", ".join([room for room, _ in busy_classrooms])
-            message_parts.append(
-                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')},在【{building_name}】有考场教室：{room_numbers}\n\n"
-            )
-        else:
-            message_parts.append(
-                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')},在【{building_name}】没有考场教室\n\n"
-            )
-
-        if time_grouped_classrooms:
-            for (
-                start_time,
-                end_time,
-            ), rooms in time_grouped_classrooms.items():
+        full_message = f"[CQ:reply,id={message_id}]"
+        if upcoming_classrooms:
+            full_message += f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            time_groups = group_classrooms_by_time(upcoming_classrooms)
+            for (start_time, end_time), rooms in time_groups.items():
                 room_list = ", ".join(rooms)
-                message_parts.append(
-                    f"【{building_name}】的 {room_list} 将在 {start_time} 至 {end_time} 进行考试\n"
-                )
+                full_message += f"{room_list} 将在 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')} 进行考试\n"
         else:
-            message_parts.append(
-                f"【{building_name}】今日内没有即将开始的考场教室或教学楼名字不存在\n请注意教室名称以教务系统为准，尽量不要用简称和俗语，如综合教学楼，JA等"
+            full_message += f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            full_message += f"【{building_name}】今日内没有即将开始的考场教室，将获取明天的考场教室\n"
+
+            # 获取该教学楼明天的考场教室
+            tomorrow_classrooms = get_tomorrow_classrooms(
+                classrooms, building_name, current_time
             )
 
-        full_message = "".join(message_parts)
-        full_message = (
-            f"[CQ:reply,id={message_id}]{full_message}\n\n"
+            if tomorrow_classrooms:
+                full_message += f"【{building_name}】明天的考场教室安排如下：\n"
+                time_groups = group_classrooms_by_time(tomorrow_classrooms)
+                for (start_time, end_time), rooms in time_groups.items():
+                    room_list = ", ".join(rooms)
+                    full_message += f"{room_list} 将在 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')} 进行考试\n"
+            else:
+                full_message += f"【{building_name}】明天没有考场教室安排\n"
+
+        full_message += (
+            "\n温馨提示，我已经做了常用教室名称简称全称的映射，教室名称以教务系统为准，尽量不要用简称和俗语，如综合楼，JA等\n"
             "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,且不能保证100%覆盖,仅供参考。\n"
             "如果你想提供你的考试数据,请前往 https://qfnuics.easy-qfnu.top 将你的考试数据导出ics,数据将会存在后台以供大家使用（整个过程完全匿名）。"
         )

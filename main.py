@@ -158,9 +158,7 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
             line_count = sum(1 for _ in file)
 
         full_message += (
-            "\n温馨提示，我已经做了常用教室名称简称全称的映射，教室名称以教务系统为准，尽量不要用简称和俗语，如综合楼，JA等\n"
-            "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,且不能保证100%覆盖,仅供参考。\n"
-            "如果你想提供你的考试数据,请前往 https://qfnuics.easy-qfnu.top 将你的考试数据导出ics,数据将会存在后台以供大家使用（整个过程完全匿名）。"
+            "\n温馨提示，我已经做了常用教室名称简称全称的映射，教室名称以教务系统为准，尽量不要用简称和俗语，如综合楼，JA等，后台数据量已经达到3000+，理论上可以覆盖99%的考场，但不能保证实时更新，仅供参考，数据量增大查询速度会变慢，请耐心等待，三秒无反应请重试\n"
             f"当前后台有效数据量：{line_count}"
         )
         await send_group_msg(

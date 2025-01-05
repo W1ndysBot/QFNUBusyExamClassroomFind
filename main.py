@@ -62,9 +62,9 @@ async def toggle_function_status(websocket, group_id, message_id, authorized):
             websocket,
             group_id,
             f"[CQ:reply,id={message_id}]✅✅✅曲阜师范大学期末考试考场教室查询功能已开启\n"
-            "开启后,本群内成员可以查询曲阜师范大学期末考试考场教室信息。\n"
-            "使用方法：群内发送“xxx考场”,即可查询xxx考场的教室信息,例如：\n"
-            "群内发送“综合教学楼考场”,即可查询综合教学楼考场的教室信息。注意教室应以教务系统命名为准，尽量不要用简称和俗语，如综合教学楼，JA等",
+            + "开启后,本群内成员可以查询曲阜师范大学期末考试考场教室信息。\n"
+            + '使用方法：群内发送"xxx考场",即可查询xxx考场的教室信息,例如：\n'
+            + '群内发送"综合教学楼考场",即可查询综合教学楼考场的教室信息。注意教室应以教务系统命名为准，尽量不要用简称和俗语,如综合教学楼,JA等',
         )
 
 
@@ -153,10 +153,15 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
             else:
                 full_message += f"【{building_name}】明天没有考场教室安排\n"
 
+        # 计算exam_info.txt文件的行数
+        with open(file_path, "r", encoding="utf-8") as file:
+            line_count = sum(1 for _ in file)
+
         full_message += (
             "\n温馨提示，我已经做了常用教室名称简称全称的映射，教室名称以教务系统为准，尽量不要用简称和俗语，如综合楼，JA等\n"
             "当前数据依据ics后台提供,数据量匮乏,可能有大部分教室无法获取到,本功能只提供有考试的教室,且不能保证100%覆盖,仅供参考。\n"
             "如果你想提供你的考试数据,请前往 https://qfnuics.easy-qfnu.top 将你的考试数据导出ics,数据将会存在后台以供大家使用（整个过程完全匿名）。"
+            f"当前后台有效数据量：{line_count}"
         )
         await send_group_msg(
             websocket,

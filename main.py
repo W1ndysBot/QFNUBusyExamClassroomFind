@@ -113,10 +113,21 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         building_name = input_name.upper()
 
         # 查找全称
+        found = False
         for full_name, aliases in building_name_map.items():
             if input_name in aliases:
                 building_name = full_name
+                found = True
                 break
+
+        # 如果没有找到对应的全称，返回提醒信息
+        if not found:
+            await send_group_msg(
+                websocket,
+                group_id,
+                f"[CQ:reply,id={message_id}]❌❌❌没有找到【{input_name}】的相关数据，请检查你的输入是否合规。请按照格式'xxx楼'，名字以教务系统为准，不要加其它东西。",
+            )
+            return
 
         file_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"

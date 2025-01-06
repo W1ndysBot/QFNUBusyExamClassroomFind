@@ -113,32 +113,34 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
         building_name = input_name.upper()
 
         # 查找全称
-        found = False
         for full_name, aliases in building_name_map.items():
             if input_name in aliases:
                 building_name = full_name
-                found = True
                 break
-
-        # 如果没有找到对应的全称，返回提醒信息
-        if not found:
-            await send_group_msg(
-                websocket,
-                group_id,
-                f"[CQ:reply,id={message_id}]❌❌❌没有找到【{input_name}】的相关数据，请检查你的输入是否合规。请按照格式'xxx楼'，名字以教务系统为准，不要加其它东西。",
-            )
-            return
 
         file_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "exam_info.txt"
         )
         classrooms = extract_classrooms(file_path)
+
+        # 检查楼名是否在数据文件中存在
+        building_exists = any(building_name in classroom for classroom in classrooms)
+
+        if not building_exists:
+            await send_group_msg(
+                websocket,
+                group_id,
+                f"[CQ:reply,id={message_id}]❌❌❌没有找到【{building_name}】的相关数据，请检查你的输入是否合规。请按照格式“xxx楼”，名字以教务系统为准，不要加其它东西。",
+            )
+            return
+
         current_time = datetime.now()  # 获取当前时间，精确到秒
 
         # 获取该教学楼今日内往后时间还有考场的教室
         upcoming_classrooms = get_upcoming_classrooms(
             classrooms, building_name, current_time
         )
+
         full_message = f"[CQ:reply,id={message_id}]"
         if upcoming_classrooms:
             full_message += f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -169,7 +171,7 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
             line_count = sum(1 for _ in file)
 
         full_message += (
-            "\n温馨提示，我已经做了常用教室名称简称全称的映射，教室名称以教务系统为准，尽量不要用简称和俗语，如综合楼，JA等，后台数据量已经达到3000+，理论上可以覆盖99%的考场，但不能保证实时更新，仅供参考，数据量增大查询速度会变慢，请耐心等待，三秒无反应请重试\n"
+            "\n温馨提示，我已经做了常用教室名称简称全称的映射，教室名称以教务系统为准，尽量不要用简称和俗语，如综合楼，JA等，后台数据量已经达到2000+，理论上可以覆盖99%的考场，但不能保证实时更新，仅供参考，数据量增大查询速度会变慢，请耐心等待，三秒无反应请重试\n"
             f"当前后台有效数据量：{line_count}"
         )
         await send_group_msg(

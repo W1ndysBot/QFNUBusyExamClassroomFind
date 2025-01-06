@@ -130,27 +130,36 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
             await send_group_msg(
                 websocket,
                 group_id,
-                f"[CQ:reply,id={message_id}]❌❌❌没有找到【{building_name}】的相关数据，请检查你的输入是否合规。请按照格式“xxx楼”，名字以教务系统为准，不要加其它东西。",
+                f"[CQ:reply,id={message_id}]❌❌❌没有找到【{building_name}】的相关数据，请检查你的输入是否合规。请按照格式‘xxx楼’，名字以教务系统为准，不要加其它东西。",
             )
             return
 
         current_time = datetime.now()  # 获取当前时间，精确到秒
 
         # 获取该教学楼今日内往后时间还有考场的教室
-        upcoming_classrooms = get_upcoming_classrooms(
+        ongoing_classrooms, upcoming_classrooms = get_upcoming_classrooms(
             classrooms, building_name, current_time
         )
 
         full_message = f"[CQ:reply,id={message_id}]"
+        if ongoing_classrooms:
+            full_message += (
+                f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            )
+            full_message += f"【{building_name}】正在进行的考试安排如下：\n"
+            time_groups = group_classrooms_by_time(ongoing_classrooms)
+            for (start_time, end_time), rooms in time_groups.items():
+                room_list = ", ".join(rooms)
+                full_message += f"{room_list} 正在进行考试，时间为 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')}\n\n"
+
         if upcoming_classrooms:
             full_message += f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
             time_groups = group_classrooms_by_time(upcoming_classrooms)
             for (start_time, end_time), rooms in time_groups.items():
                 room_list = ", ".join(rooms)
-                full_message += f"{room_list} 将在 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')} 进行考试\n"
+                full_message += f"{room_list} 将在 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')} 进行考试\n\n"
         else:
-            full_message += f"当前时间：{current_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-            full_message += f"【{building_name}】今日内没有即将开始的考场教室，将获取明天的考场教室\n"
+            full_message += f"【{building_name}】今日内没有即将开始的考场教室，将获取明天的考场教室\n\n"
 
             # 获取该教学楼明天的考场教室
             tomorrow_classrooms = get_tomorrow_classrooms(
@@ -162,9 +171,9 @@ async def process_exam_classroom_info(websocket, group_id, message_id, raw_messa
                 time_groups = group_classrooms_by_time(tomorrow_classrooms)
                 for (start_time, end_time), rooms in time_groups.items():
                     room_list = ", ".join(rooms)
-                    full_message += f"{room_list} 将在 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')} 进行考试\n"
+                    full_message += f"{room_list} 将在 {start_time.strftime('%H:%M')} 至 {end_time.strftime('%H:%M')} 进行考试\n\n"
             else:
-                full_message += f"【{building_name}】明天没有考场教室安排\n"
+                full_message += f"【{building_name}】明天没有考场教室安排\n\n"
 
         # 计算exam_info.txt文件的行数
         with open(file_path, "r", encoding="utf-8") as file:

@@ -30,17 +30,25 @@ def extract_classrooms(file_path):
 
 def get_upcoming_classrooms(classrooms, building_name, current_time):
     upcoming_classrooms = {}
+    ongoing_classrooms = {}  # 新增：用于存储正在进行的考试
     for classroom, exams in classrooms.items():
         for start_time, end_time, subject in exams:
-            if (
-                start_time.date() == current_time.date()
-                and start_time > current_time
-                and building_name in classroom
-            ):
-                if classroom not in upcoming_classrooms:
-                    upcoming_classrooms[classroom] = []
-                upcoming_classrooms[classroom].append((start_time, end_time, subject))
-    return upcoming_classrooms
+            if start_time.date() == current_time.date() and building_name in classroom:
+                if start_time <= current_time <= end_time:
+                    # 当前时间正在进行的考试
+                    if classroom not in ongoing_classrooms:
+                        ongoing_classrooms[classroom] = []
+                    ongoing_classrooms[classroom].append(
+                        (start_time, end_time, subject)
+                    )
+                elif start_time > current_time:
+                    # 即将开始的考试
+                    if classroom not in upcoming_classrooms:
+                        upcoming_classrooms[classroom] = []
+                    upcoming_classrooms[classroom].append(
+                        (start_time, end_time, subject)
+                    )
+    return ongoing_classrooms, upcoming_classrooms
 
 
 def get_tomorrow_classrooms(classrooms, building_name, current_time):
